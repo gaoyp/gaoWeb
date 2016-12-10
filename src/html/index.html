@@ -1,0 +1,1485 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" >
+<link rel="icon" href="/cloudplat/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" type="image/ico" href="/cloudplat/favicon.ico">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <title>天翼购</title>
+    <link rel="icon" href="/cloudplat/favicon.ico" type="image/x-icon" />
+    <link href="/cloudplat/styles/web/index.css" rel="stylesheet" type="text/css" />
+    <link href="/cloudplat/styles/web/swipe.css" rel="stylesheet" type="text/css" />
+    <script src="/cloudplat/scripts/jquery-1.9.1.js"></script>
+    <script src="/cloudplat/scripts/web/swipe.js"></script>
+    <script src="/cloudplat/scripts/web/swipe_1.js"></script>
+    <script src="/cloudplat/scripts/base64.js"></script>
+    <script src="/cloudplat/scripts/tripledes.js"></script>
+    <script src="/cloudplat/scripts/mode-ecb.js"></script>
+    <script src="/cloudplat/scripts/passwordEncryptorDecryptor.js"></script>
+    <script src="/cloudplat/scripts/json2.js"></script>
+    <script type="text/javascript">
+        var isIndex = "index";
+        //楼层完全编码
+        var totCode1='';
+        var totCode2='';
+        var totCode3='';
+        jQuery(function($) {
+            //楼层配置省分
+            $.ajax({url:"/cloudplat/web/index/getAllFloor",
+                dataType:"json",
+                async:false,
+                success:function(data){
+                    if (data != null) {
+                        totCode1 = data[0].totalCode;
+                        totCode2 = data[1].totalCode;
+                        totCode3 = data[2].totalCode;
+                        $("#floor1").empty();
+                        $("#floor2").empty();
+                        $("#floor3").empty();
+                        $("#floor1").append(data[0].columnName) ;
+                        $("#floor2").append(data[1].columnName) ;
+                        $("#floor3").append(data[2].columnName) ;
+
+                        var href1;
+                        var href2;
+                        var href3;
+
+                        $.ajax({
+                            url:"/cloudplat/web/index/getColumnByRelate/"+data[0].relate,
+                            dataType:"json",
+                            async:false,
+                            success:function(dataQ){
+                                if (dataQ != null) {
+                                    href1 = "/cloudplat/web/plSearch/query/0-"+dataQ[0].totalCode+"?cn="+dataQ[0].columnName;
+                                }
+                            }
+                        });
+                        $.ajax({
+                            url:"/cloudplat/web/index/getColumnByRelate/"+data[1].relate,
+                            dataType:"json",
+                            async:false,
+                            success:function(dataQ){
+                                if (dataQ != null) {
+                                    href2 = "/cloudplat/web/plSearch/query/0-"+dataQ[0].totalCode+"?cn="+dataQ[0].columnName;
+                                }
+                            }
+                        });
+                        $.ajax({
+                            url:"/cloudplat/web/index/getColumnByRelate/"+data[2].relate,
+                            dataType:"json",
+                            async:false,
+                            success:function(dataQ){
+                                if (dataQ != null) {
+                                    href3 = "/cloudplat/web/plSearch/query/0-"+dataQ[0].totalCode+"?cn="+dataQ[0].columnName;
+                                }
+                            }
+                        });
+
+                        $("#more1F").append("<a href="+href1+">更多>></a>");
+                        $("#more2F").append("<a href="+href2+">更多>></a>");
+                        $("#more3F").append("<a href="+href3+">更多>></a>");
+                    }
+                }});
+
+            //轮播图-开始
+            ajaxData(0,false);
+            sylbt('slider',3000,'on','position');
+            ajaxData(1,false);
+            sylbt('slider_1',2000,'on_1','position_1');
+            ajaxData(2,false);
+            sylbt('slider_2',2000,'on_1','position_2');
+            ajaxData(3,false);
+            sylbt('slider_3',2000,'on_1','position_3');
+            //轮播图-结束
+            ajaxData(4,false); //首页广告位1
+            ajaxData(5,false); //首页广告位2
+            //1楼
+            ajaxData(6,false);
+            //2楼
+            ajaxData(7,false);
+            //3楼
+            ajaxData(8,false);
+        })
+        function sylbt(s1,i2,s3,s4){
+            var slider = Swipe(document.getElementById(s1), {
+                auto: i2,
+                continuous: true,
+                callback: function (pos) {
+                    var i = bullets.length;
+                    while (i--) {
+                        bullets[i].className = ' ';
+                    }
+                    bullets[pos].className = s3;
+                }
+            });
+            var bullets = document.getElementById(s4).getElementsByTagName('li');
+            for (var i=0; i < bullets.length; i++) {
+                var elem = bullets[i];
+                elem.setAttribute('data-tab', i);
+                elem.onclick = function(){
+                    slider.slide(parseInt(this.getAttribute('data-tab'), 10), 500);
+                }
+            }
+        }
+        function ajaxData(stype,astype){
+            var url='';
+            var async=astype;
+            var funError=getAjaxDataError;
+            var funSuccess=getAjaxDataSuccess;
+            var sparam='';
+            //0:首页轮播图1,
+            switch(stype){
+                case 0:
+                    url='/cloudplat/web/index/getAdContent';
+                    funSuccess=getAdhtml1;
+                    sparam="{adCode:'SYLBT1',adType:'0',adCount:'6'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 1:
+                    url='/cloudplat/web/index/getAdContent';
+                    funSuccess=getAdhtml2;
+                    sparam="{adCode:'SYLBT2',adType:'0',adCount:'3'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 2:
+                    url='/cloudplat/web/index/getAdContent';
+                    funSuccess=getAdhtml3;
+                    sparam="{adCode:'SYLBT3',adType:'0',adCount:'3'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 3:
+                    url='/cloudplat/web/index/getAdContent';
+                    funSuccess=getAdhtml4;
+                    sparam="{adCode:'SYLBT4',adType:'0',adCount:'3'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 4:
+                    url='/cloudplat/web/index/getAdContent';
+                    funSuccess=getAdhtml5;
+                    sparam="{adCode:'SYGGW1',adType:'0',adCount:'4'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+
+                case 6:
+                    url='/cloudplat/web/index/getSaleProduct';
+                    funSuccess=getAdhtml7;
+                    var columnCode;
+                    if(totCode1!==null && totCode1!==''){
+                        columnCode=totCode1;
+                    }else{
+                        columnCode="100100101";
+                    }
+                    sparam="{columnId:"+columnCode+",iconType:'3',plCount:'8'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 7:
+                    url='/cloudplat/web/index/getSaleProduct';
+                    funSuccess=getAdhtml8;
+                    var columnCode;
+                    if(totCode2!==null && totCode2!==''){
+                        columnCode=totCode2;
+                    }else{
+                        columnCode="100100100";
+                    }
+                    sparam="{columnId:"+columnCode+",iconType:'3',plCount:'8'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+                case 8:
+                    url='/cloudplat/web/index/getSaleProduct';
+                    funSuccess=getAdhtm20;
+                    var columnCode;
+                    if(totCode3!==null && totCode3!==''){
+                        columnCode=totCode3;
+                    }else{
+                        columnCode="100100102";
+                    }
+                    sparam="{columnId:"+columnCode+",iconType:'3',plCount:'8'}";
+                    sparam=eval('('+sparam+')');
+                    break;
+            }
+            $.ajax({
+                url:url,
+                type:'get',
+                dataType:'json',
+                async:async,
+                data:sparam,
+                error:funError, //非必须
+                success:funSuccess//非必须
+            });
+        }
+        function getAjaxDataError(data){}
+        function getAjaxDataSuccess(data){}
+        function getAdhtml1(data){
+            var shtml = [];
+            var shtml_1 = [];
+            var st_1='';
+            var j = 1;
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    var st = '';
+                    if(i==0){
+                        st = 'data-index="1"';
+                    }
+                    shtml.push('<div class="wrap" '+st+'>');
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'" />');
+                    shtml.push('</a>');
+                    shtml.push('</div>');
+                    if(data.length==j){
+                        st_1 = 'on';
+                    }
+                    shtml_1.push('<li class="'+st_1+'"></li>');
+                    j++;
+                }
+            }
+            //alert(shtml.join(''));
+            //alert(shtml_1.join(''));
+            $("#sylbt1").html(shtml.join(''));
+            $("#position").html(shtml_1.join(''));
+        }
+        function getAdhtml2(data){
+            var shtml = [];
+            var shtml_1 = [];
+            var st_1='';
+            var j = 1;
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    var st = '';
+                    if(i==0){
+                        st = 'data-index="1"';
+                    }
+                    shtml.push('<div class="wrap_1" '+st+'>');
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'" />');
+                    shtml.push('</a>');
+                    shtml.push('</div>');
+                    if(data.length==j){
+                        st_1 = 'on_1';
+                    }
+                    shtml_1.push('<li class="'+st_1+'"></li>');
+                    j++;
+                }
+            }
+            //alert(shtml.join(''));
+            //alert(shtml_1.join(''));
+            $("#sylbt2").html(shtml.join(''));
+            $("#position_1").html(shtml_1.join(''));
+        }
+        function getAdhtml3(data){
+            var shtml = [];
+            var shtml_1 = [];
+            var st_1='';
+            var j = 1;
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    var st = '';
+                    if(i==0){
+                        st = 'data-index="1"';
+                    }
+                    shtml.push('<div class="wrap_1" '+st+'>');
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'" />');
+                    shtml.push('</a>');
+                    shtml.push('</div>');
+                    if(data.length==j){
+                        st_1 = 'on_1';
+                    }
+                    shtml_1.push('<li class="'+st_1+'"></li>');
+                    j++;
+                }
+            }
+            //alert(shtml.join(''));
+            //alert(shtml_1.join(''));
+            $("#sylbt3").html(shtml.join(''));
+            $("#position_2").html(shtml_1.join(''));
+        }
+        function getAdhtml4(data){
+            var shtml = [];
+            var shtml_1 = [];
+            var st_1='';
+            var j = 1;
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    var st = '';
+                    if(i==0){
+                        st = 'data-index="1"';
+                    }
+                    shtml.push('<div class="wrap_1" '+st+'>');
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'"  />');
+                    shtml.push('</a>');
+                    shtml.push('</div>');
+                    if(data.length==j){
+                        st_1 = 'on_1';
+                    }
+                    shtml_1.push('<li class="'+st_1+'"></li>');
+                    j++;
+                }
+            }
+            //alert(shtml.join(''));
+            //alert(shtml_1.join(''));
+            $("#sylbt4").html(shtml.join(''));
+            $("#position_3").html(shtml_1.join(''));
+        }
+        function getAdhtml5(data){
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    var shtml = [];
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<li>');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'" />');
+                    shtml.push('</li>');
+                    shtml.push('</a>');
+                    if(i==0){
+                        $("#syggw1").html(shtml.join(''));
+                    }else if(i==1){
+                        $("#syggwRight").html(shtml.join(''));
+                    }else if(i==2){
+                        //$("#adImg").html(shtml.join(''));
+                    }
+
+                }
+            }
+        }
+        function getAdhtml6(data){
+            var shtml = [];
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    var targetValue = "";
+                    if("1" == data[i].newPageUrl){
+                        targetValue = "_blank";
+                    }
+                    shtml.push('<a href="'+data[i].adUrl+'" target="'+targetValue+'">');
+                    shtml.push('<img src="'+data[i].uploadPath+'" alt="'+data[i].adTitile+'" />');
+                    shtml.push('</a>');
+                }
+            }
+            //alert(shtml.join(''));
+            $("#syggw2").html(shtml.join(''));
+        }
+        function getAdhtml7(data){  //1L热销专区
+            var shtml = [];
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    shtml.push('<a href="/cloudplat/web/plSearch/productInfo/'+data[i].productCode+'" target="_blank">');
+                    shtml.push('<div class="hot_shangpin_1">');
+                    shtml.push('<dl>');
+                    shtml.push('<dt><img width="200" height="200" src="'+data[i].picUrl+'" /></dt>');
+                    shtml.push('<dd>');
+                    shtml.push('<p>'+data[i].productName+'</p>');
+                    shtml.push('<a href="/cloudplat/web/plSearch/query/7-'+data[i].supplierName+'?cn=搜索"><p>'+data[i].supplierName+'</p></a>');
+                    if("" == '2'){
+                        if(data[i].salesPrice != null &&  data[i].salesPrice > 0){
+                            shtml.push('<p class="price">促销价：<b>&yen;</b><span>'+data[i].salesPrice+'</span></p>');
+                        }else{
+                            shtml.push('<p class="price">直供价：<b>&yen;</b><span>'+data[i].zgPrice+'</span></p>');
+                        }
+                    }else{
+                        shtml.push('<p class="price">零售价：<b>&yen;</b><span>'+data[i].retailPrice+'</span></p>');
+                    }
+                    shtml.push('</dd>');
+                    shtml.push('</dl>');
+                    if("" == '2'){
+                        if(data[i].isMarket == "1"){
+                            shtml.push('<div class="acticityImg-t"></div>');
+                        }
+                    }
+                    shtml.push('</div>');
+                    shtml.push('</a>');
+                }
+            }
+            //alert(shtml.join(''));
+            $("#pl_f1").html(shtml.join(''));
+        }
+        function getAdhtml8(data){ //2L新品专区
+            var shtml = [];
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    shtml.push('<a href="/cloudplat/web/plSearch/productInfo/'+data[i].productCode+'" target="_blank">');
+                    shtml.push('<div class="hot_shangpin_1">');
+                    shtml.push('<dl>');
+                    shtml.push('<dt><img width="200" height="200" src="'+data[i].picUrl+'"  /></dt>');
+                    shtml.push('<dd>');
+                    shtml.push('<p>'+data[i].productName+'</p>');
+                    shtml.push('<a href="/cloudplat/web/plSearch/query/7-'+data[i].supplierName+'?cn=搜索"><p>'+data[i].supplierName+'</p></a>');
+                    if("" == '2'){
+                        if(data[i].salesPrice != null &&  data[i].salesPrice > 0){
+                            shtml.push('<p class="price">促销价：<b>&yen;</b><span>'+data[i].salesPrice+'</span></p>');
+                        }else{
+                            shtml.push('<p class="price">直供价：<b>&yen;</b><span>'+data[i].zgPrice+'</span></p>');
+                        }
+                    }else{
+                        shtml.push('<p class="price">零售价：<b>&yen;</b><span>'+data[i].retailPrice+'</span></p>');
+                    }
+                    shtml.push('</dd>');
+                    shtml.push('</dl>');
+                    if("" == '2'){
+                        if(data[i].isMarket == "1"){
+                            shtml.push('<div class="acticityImg-t"></div>');
+                        }
+                    }
+                    shtml.push('</div>');
+                    shtml.push('</a>');
+                }
+            }
+            //alert(shtml.join(''));
+            $("#pl_f2").html(shtml.join(''));
+        }
+        function getAdhtm20(data){ //3L4G终端
+            var shtml = [];
+            if (data != null) {
+                for(var i = 0 ; i < data.length ; i++){
+                    shtml.push('<a href="/cloudplat/web/plSearch/productInfo/'+data[i].productCode+'" target="_blank">');
+                    shtml.push('<div class="hot_shangpin_1">');
+                    shtml.push('<dl>');
+                    shtml.push('<dt><img width="200" height="200" src="'+data[i].picUrl+'"  /></dt>');
+                    shtml.push('<dd>');
+                    shtml.push('<p>'+data[i].productName+'</p>');
+                    shtml.push('<a href="/cloudplat/web/plSearch/query/7-'+data[i].supplierName+'?cn=搜索"><p>'+data[i].supplierName+'</p></a>');
+                    if("" == '2'){
+                        if(data[i].salesPrice != null &&  data[i].salesPrice > 0){
+                            shtml.push('<p class="price">促销价：<b>&yen;</b><span>'+data[i].salesPrice+'</span></p>');
+                        }else{
+                            shtml.push('<p class="price">直供价：<b>&yen;</b><span>'+data[i].zgPrice+'</span></p>');
+                        }
+                    }else{
+                        shtml.push('<p class="price">零售价：<b>&yen;</b><span>'+data[i].retailPrice+'</span></p>');
+                    }
+                    shtml.push('</dd>');
+                    shtml.push('</dl>');
+                    if("" == '2'){
+                        if(data[i].isMarket == "1"){
+                            shtml.push('<div class="acticityImg-t"></div>');
+                        }
+                    }
+                    shtml.push('</div>');
+                    shtml.push('</a>');
+                }
+            }
+            $("#pl_f3").html(shtml.join(''));
+        }
+        function getAdhtml9(data){
+            var shtml = [];
+            if (data != null) {
+                shtml.push('<h2>热销排行</h2>');
+                var k = 1;
+                for(var i = 0 ; i < data.length ; i++){
+                    //alert(data[0].id);
+                    shtml.push('<a href="/cloudplat/web/plSearch/productInfo/'+data[i].productCode+'" target="_blank">');
+                    shtml.push('<div class="f2_right1">');
+                    shtml.push('<div class="f2_right2">');Swipe
+                    shtml.push('<img src="'+data[i].picUrl+'"  />');
+                    shtml.push('</div>');
+                    shtml.push('<div class="f2_right3">');
+                    shtml.push('<p class="f2_rightp"> <span>'+k+'</span>'+data[i].productName+'</p>');
+                    //shtml.push('<p class="f2_rightp_1"><span> &yen;</span>'+data[i].zgPrice+'</p>');
+                    if("" == '2'){
+                        if(data[i].salesPrice != null &&  data[i].salesPrice > 0){
+                            shtml.push('<p class="price">促销价：<span>&yen;'+data[i].salesPrice+'</span></p>');
+                        }else{
+                            shtml.push('<p class="price">直供价：<span>&yen;'+data[i].zgPrice+'</span></p>');
+                        }
+                    }else{
+                        shtml.push('<p class="price">零售价：<span>&yen;'+data[i].retailPrice+'</span></p>');
+                    }
+                    shtml.push('</div>');
+                    shtml.push('</div>');
+                    shtml.push('</a>');
+                    k++;
+                }
+            }
+            //alert(shtml.join(''));
+            $("#right_pl").html(shtml.join(''));
+        }
+        function login(){
+            var notLogin = false;
+            //获取验证码，校验验证码是否正确
+            var qiantaiCode = $("#qiantaiCode").val();
+            if(qiantaiCode==null||qiantaiCode==""){
+                $("#vCodeWrong").html('');
+                vCodeHtml =' <span style="color:red">请输入验证码！</span>';
+                $("#vCodeWrong").html(vCodeHtml);
+                notLogin = true;
+            }
+
+            if(!notLogin){
+                $.ajax({url:"/cloudplat/web/channelregist/regist/checkCode",
+                    data:{"qiantaiCode":qiantaiCode},
+                    async:false,
+                    success:function(e){
+                        if (e != null && e != "") {
+                            data =  eval('('+e+')');
+                            if(data.result=="ok"){
+                                $("#vCodeWrong").html('');
+                                vCodeHtml ='';
+                                $("#vCodeWrong").html(vCodeHtml);
+                            }else{
+                                $("#vCodeWrong").html('');
+                                vCodeHtml =' <span style="color:red">验证码不正确！</span>';
+                                $("#vCodeWrong").html(vCodeHtml);
+                                notLogin = true;
+                            }
+                        }
+                    }});
+            }
+            var loginId  =  $("#j_username").val();
+            if(!notLogin){
+                // 验证当前用户是否已经登录了，如果登录，给出提示：当前用户在别处已经登录，是否强制登录
+                $.ajax({
+                    url:"/cloudplat/onlyOneLoginValidation",
+                    data:{'loginId':loginId,'loginType':'1'},
+                    async:false,
+                    success:function(e){
+
+                        if(e=="1"){
+                            if(!confirm("当前用户在另一处已经登录，是否强制登录！")){
+                                notLogin = true;
+                            }
+                        }
+
+                    }
+                });
+            }
+
+            if(notLogin){
+                return false;
+            }
+            /* 查询是否开启统一认证 */
+            var uniformAuthenticationFlag=0;
+            if(uniformAuthenticationFlag=='1')
+                $("#loginForm").attr("action","/cloudplat/web/uniform/login");
+            else if(uniformAuthenticationFlag=='0')
+                $("#loginForm").attr("action","/cloudplat/web/j_web_security_check");
+
+            var password = $("#j_password").val();
+//     	var b = new Base64();
+//     	var str = b.encode(password);
+            var str = encryptByDES(password)
+            $("#j_password").val(str);
+        }
+        $(document).ready(function(){
+            if("" == '2'){
+                $.ajax({
+                    url:webPath1+"/web/order/orderInfoes/orderStatus",
+                    type: "post",
+                    async:false,
+                    success:function(data){
+                        var status = JSON.parse(data)
+                        var statusArr = status.responseMessage.split(',');
+                        $("#status1").html(statusArr[0]);
+                        $("#status2").html(statusArr[1]);
+                        $("#status5").html(statusArr[2]);
+                    }
+                });
+            }
+        })
+
+
+        // 重载验证码
+        function changeCode(){
+            var nowtime = new Date().getTime();
+            document.getElementById("safecode").src="/cloudplat/web/channelregist/regist/generateCodeQianTaiLogin?t="+nowtime;
+        }
+    </script>
+</head>
+<body>
+<div class="box">
+    <!-- 头部 -开始-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <link rel="icon" href="/cloudplat/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" type="image/ico" href="/cloudplat/favicon.ico">
+    <script src="/cloudplat/scripts/tripledes.js"></script>
+    <script src="/cloudplat/scripts/mode-ecb.js"></script>
+    <script src="/cloudplat/scripts/passwordEncryptorDecryptor.js"></script>
+    <script src="/cloudplat/scripts/web/index.js"></script>
+    <div class="box_top">
+        <ul style=" width:50%;">
+            <!--
+            <li style=" margin-right:10px;"><img src="../images/web/zhuti_3.png" /></li>
+            <li style=" margin-right:15px; color:#00c5d2;">le,五星级会员</li>
+            -->
+
+            <li style=" margin-right:10px; color:#858585;">您好，欢迎来到天翼购！</li>
+            <li style=" margin-right:15px;"><a href="/cloudplat/web/userSign" style="color:red;">[请登录]</a></li>
+            <li><a href="/cloudplat/web/channelregist/regist">[免费注册]</a></li>
+        </ul>
+        <ul style="margin-right:120px;float: right;" >
+            <li class="" id="">
+			<span class="user-info">
+			&nbsp;&nbsp;
+</span>
+            </li>
+            <li class="cart-s">
+                <a href="/cloudplat/web/cart" style="color:#858585;">购物车</a>
+                <div class="cart-content"></div>
+            </li>
+            <li class="dingdan"><a href="/cloudplat/web/order/orderInfoes/orderlist" style="color:#858585;">我的订单</a></li>
+            <li class="quickBuy" onclick="submitOnclick()"><i></i><a href="javascript:void(0);">快速购买</a></li>
+
+            <li class="" id=""></li>
+        </ul>
+    </div>
+    <div style="clear:both; width:1240px; margin:0 auto; position: relative;z-index:1">
+        <div class="box_top_left">
+            <a href="/cloudplat/web/index">
+                <img src="/cloudplat/images/web/logo.png" style=" margin-top:25px; "/></a>
+        </div>
+        <!--搜索框-->
+        <div class="box_top_right">
+            <div id="search">
+                <div class="box_top_center">
+                    <input type="text" id="pl_value" value=""/>
+                    <strong class="sousuo" style="cursor:pointer;" onclick="plSearch();"> 搜索</strong>
+                </div>
+                <ul id="shelper" class="hide">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <!--右侧悬浮-->
+    <div class="xuanfu">
+        <ul>
+            <li class="go-top"><a href="/cloudplat/web/cart"><img class="icon-top" src="/cloudplat/images/web/zhuti_9.jpg" width="41" height="41" /><div class="text-top">购物车</div></a></li>
+            <li class="go-top"><a href="javascript:scroll(0,0);"><img class="icon-top" src="/cloudplat/images/web/zhuti_12.jpg" width="41" height="41" /><div class="text-top">顶部</div></a></li>
+        </ul>
+    </div>
+
+    <div class="as-shelter"></div>
+    <div class="as-total-container">
+        <div id="top_search" class="top_search">
+        </div>
+    </div>
+
+    <!--首页-->
+    <div class="top"></div>
+    <!--导航 Start-->
+    <div class="menu">
+        <div id="nav-head">
+            <div class="all-sort"><h2><a href="javascript:void(0);">全部商品分类</a></h2></div>
+        </div>
+        <div class="nav">
+            <ul class="clearfix" id="index_column"></ul>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var webPath1 = "/cloudplat";
+        function boxClose1(){   //关闭提示窗口
+            $(".thickdiv").remove();
+            $(".thickbox").remove();
+
+            window.location.href="/cloudplat/web/index";
+        }
+        function boxClose(){   //关闭提示窗口
+            $(".thickdiv").remove();
+            $(".thickbox").remove();
+            $.ajax({url:"/cloudplat/web/index/removeUserSession",
+                dataType:"json",
+                async:false,
+                success:function(e) {}
+            });
+            window.location.href="/cloudplat/web/userSign";
+        }
+        function cancelOrder(){
+            var isagree = $('input[name="isagree"]:checked').val();
+            if(isagree == "1"){
+                $.ajax({url:"/cloudplat/web/index/updateSign",
+                    data: {isagree:isagree},
+                    dataType:"json",
+                    async:false,
+                    success:function(e) {
+                        if (e != null && e != "") {
+                            if(e.result=="success"){
+                                boxClose1();
+                            }
+                        }
+                    }
+                });
+            }else{
+                boxClose();
+                window.location.href="/cloudplat/web/userSign";
+            }
+        }
+        function submitOnclick(){
+            //form1.action="/cloudplat/web/plSearch/speedQuery";
+            //form1.submit();
+            window.location.href="/cloudplat/web/plSearch/speedQuery";
+        }
+        jQuery(function($) {
+
+            if("true" == "false"){
+                $.ajax({url:"/cloudplat/web/index/getUserSessionValue",
+                    dataType:"json",
+                    async:false,
+                    success:function(e) {
+                        if (e) {
+                            win_prompt();
+                        }
+                    }
+                });
+            }
+            $.ajax({url:"/cloudplat/web/index/getProductColumn",
+                dataType:"json",
+                async:false,
+                success:function(data){
+                    if (data != null) {
+                        var columnHtml = [];
+                        var strValue = "";
+                        var columnZb = '';//总部4个栏目
+                        var columnPro = '';//省分4个栏目
+                        for(var i = 0 ; i < data.length ; i++){
+                            //alert(data[0].id);
+                            var str = "";
+                            if(data[i].totalCode.length==6){//一级栏目
+                                if("100100"=="" && i==0){
+                                    str = "current";
+                                }
+                                if(data[i].totalCode=="100100"){
+                                    str = "current";
+                                }
+
+// 			  				}else if(data[i].totalCode=="100130"){  //栏目3和栏目5对调
+
+// 			  				}else if(data[i].totalCode=="100140"){  //栏目3和栏目5对调
+
+// 			  				}else if(data[i].totalCode=="100150"){  //栏目3和栏目5对调
+
+// 			  				}else{
+
+// 			  				}
+
+
+                                if("100100"==data[i].totalCode){
+                                    columnHtml.push('<li><a href="/cloudplat/web/index" class="'+str+'">'+data[i].columnName+'</a></li>');
+                                }else if("8100000"==data[i].totalCode){
+                                    columnZb += '<li><a href="/cloudplat/web/plSearch/query/0-'+data[i].totalCode+'?cn='+data[i].columnName+'" class="'+str+'">'+data[i].columnName+'</a></li>';
+                                }else{
+                                    columnPro += '<li><a href="/cloudplat/web/plSearch/query/0-'+data[i].totalCode+'?cn='+data[i].columnName+'" class="'+str+'">'+data[i].columnName+'</a></li>';
+                                }
+                            }
+                        }
+                        columnHtml.push(columnZb);
+                        columnHtml.push(columnPro);
+                        if("900900"=="100100"){
+                            strValue = "current";
+                        }
+                        columnHtml.push('<li><a href="/cloudplat/web/accounts/user/900900" class="'+strValue+'">我的账户</a></li>');
+
+                        $("#index_column").html(columnHtml.join(''));
+                    }
+                }});
+            $.ajax({url:"/cloudplat/web/index/getbDProvinceTel",
+                dataType:"json",
+                async:false,
+                success:getTelhtml
+            });
+            function getTelhtml(data){
+                if (data != null) {
+                    for(var i = 0 ; i < data.length ; i++){
+                        //alert(data[0].id);
+                        $("#kfdh").html("&nbsp;"+data[i].tel);
+                    }
+                }
+            }
+            $.ajax({
+                url: '/cloudplat/web/productHotSearch/getHotProduct',
+                dataType: 'json',
+                type: 'get',
+                success: function(data) {
+                    if(data!=null && data!=""){
+                        var hotHtml = '<div id="hotwords">'
+                            + '	<strong>热门搜索：</strong>';
+                        for(var j=0; j<data.length; j++){
+                            hotHtml +='<a href="/cloudplat/web/plSearch/query/7-'+data[j].PRODUCT_NAME+'?cn=搜索" target="_blank">'+data[j].PRODUCT_NAME+'</a>';
+                        }
+                        hotHtml +='</div>';
+                        $("#search").append(hotHtml);
+                    }
+                }
+            })
+            if("true" == "false"){
+                $.ajax({
+                    url:"/cloudplat/web/cart/queryCart",
+                    type: "get",
+                    async:false,
+                    success:function(data){
+                        var str= data.replace(/&#034;/g,'"').replace(/\s+/g,"\ ").replace(/\\/g,"\\\\");
+                        if (typeof(JSON) == 'undefined'){
+                            var cartJson = eval("("+str+")");
+                        }else{
+                            var cartJson = JSON.parse(str);
+                        }
+                        if(cartJson!="" && cartJson!=null){
+                            var num = 0
+                            for(var i=0; i<cartJson.length; i++){
+                                num += parseFloat(cartJson[i].productAmount);
+                            }
+                            $(".ci-count").text(num);
+                        }
+                    }
+                });
+            }
+            $(".cart-s").hover(function() {	//显示购物车详细
+                    if('' == 2){
+                        var totalNum = 0;
+                        var totalPrice = 0;
+                        var html = ''
+                            + '	<div class="smt"><h4>最近加入的商品</h4></div>'
+                            + '	<div class="smc">';
+                        $.ajax({
+                            url:"/cloudplat/web/cart/queryCart",
+                            type: "get",
+                            async:false,
+                            success:function(data){
+                                var str= data.replace(/&#034;/g,'"');
+                                if (typeof(JSON) == 'undefined'){
+                                    var cartJson = eval("("+str+")");
+                                }else{
+                                    var cartJson = JSON.parse(str);
+                                }
+                                for(var i=0; i<cartJson.length; i++){
+                                    var pPrice = cartJson[i].zgPrice; //实际付款价格
+                                    var sPrice = ""; //特价
+                                    var isPresell = 0; //是否预售
+                                    var pcObj = {}; //主子商品类型活动信息
+                                    if(cartJson[i].isMarket=="1"){
+                                        $.ajax({	//获取营销活动
+                                            url:webPath1+"/web/maMarketingActivity/acticityWebSearch",
+                                            data:{productCode:cartJson[i].productCode,productId:cartJson[i].productId},
+                                            type: "post",
+                                            async:false,
+                                            success:function(data){
+                                                if(data!="" && data!=null){
+                                                    acticityJson = JSON.parse(data);
+                                                    for(var j = 0 ; j<acticityJson.length; j++){
+                                                        switch(acticityJson[j].marketingType){
+                                                            case "1":	//特价
+                                                                pPrice = acticityJson[j].sales_price;
+                                                                sPrice = acticityJson[j].sales_price;
+                                                                break;
+                                                            case "3":	//买赠
+                                                                pcObj["id"] = acticityJson[j].giftid; //类型
+                                                                pcObj["code"] = acticityJson[j].giftcode; //名称
+                                                                break;
+                                                            case "4":	//搭售
+                                                                pcObj["id"] = acticityJson[j].giftid; //类型
+                                                                pcObj["code"] = acticityJson[j].giftcode; //名称
+                                                                pcObj["rule1"] = acticityJson[j].filed4;	//规则1
+                                                                pcObj["rule2"] = acticityJson[j].filed5;	//规则2
+                                                                break;
+                                                            case "5":	//预售
+                                                                isPresell = 1;
+                                                                break;
+                                                            case "6":	//礼包
+                                                                if(acticityJson[j].marketing_activities_id == cartJson[i].maId){
+                                                                    pcObj["id"] = acticityJson[j].giftid; //类型
+                                                                    pcObj["code"] = acticityJson[j].giftcode; //名称
+                                                                    pPrice = acticityJson[j].sales_price;
+                                                                    break;
+                                                                }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            error: function(){
+                                                alert("营销活动信息获取失败，请联系客服");
+                                                return;
+                                            }
+                                        });
+                                    }
+                                    totalNum += parseFloat(cartJson[i].productAmount);
+                                    if(cartJson[i].maType != null && cartJson[i].parentCartId == null){
+                                        html += '<ul><li>'
+                                            + '	<div class="p-img">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank"><img src="'+cartJson[i].picUrl+'" width="50" height="50"></a>'
+                                            + '	</div>'
+                                            + '	<div class="p-name">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank">'+cartJson[i].productName+'</a>'
+                                            + '	</div>'
+                                            + '	<div class="p-detail">'
+                                            + '		<span class="p-price"><strong>￥'+pPrice+'</strong>×'+cartJson[i].productAmount+'</span><br>'
+                                            + '		<a class="delete" href="javascript:delHCart('+"'"+cartJson[i].id+"'"+','+"'"+pcObj.id+"'"+');">删除</a>'
+                                            + '	</div>'
+                                            + '</li></ul>';
+                                        totalPrice += parseFloat(cartJson[i].productAmount)*pPrice
+                                    }else if(cartJson[i].maType != null && cartJson[i].parentCartId != null){
+                                        html += '<ul data-pid="'+cartJson[i].productId+'" data-id="'+cartJson[i].id+'"><li>'
+                                            + '	<div class="p-img">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank"><img src="'+cartJson[i].picUrl+'" width="50" height="50"></a>'
+                                            + '	</div>'
+                                            + '	<div class="p-name">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank">'+cartJson[i].productName+'</a>'
+                                            + '	</div>'
+                                            + '	<div class="p-detail">'
+                                        if(cartJson[i].maType=="3"){
+                                            html += '<span class="p-price"><strong>￥0.00</strong>×'+cartJson[i].productAmount+'</span><br>'
+                                        }else{
+                                            totalPrice += parseFloat(cartJson[i].productAmount)*pPrice
+                                            html += '<span class="p-price"><strong>￥'+pPrice+'</strong>×'+cartJson[i].productAmount+'</span><br>'
+                                        }
+                                        html += '	</div>'
+                                            + '</li></ul>';
+                                    }else{
+                                        html += '<ul><li>'
+                                            + '	<div class="p-img">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank"><img src="'+cartJson[i].picUrl+'" width="50" height="50"></a>'
+                                            + '	</div>'
+                                            + '	<div class="p-name">'
+                                            + '		<a href="/cloudplat/web/plSearch/productInfo/'+cartJson[i].productCode+'" target="_blank">'+cartJson[i].productName+'</a>'
+                                            + '	</div>'
+                                            + '	<div class="p-detail">'
+                                            + '		<span class="p-price"><strong>￥'+pPrice+'</strong>×'+cartJson[i].productAmount+'</span><br>'
+                                            + '		<a class="delete" href="javascript:delHCart('+"'"+cartJson[i].id+"'"+');">删除</a>'
+                                            + '	</div>'
+                                            + '</li></ul>';
+                                        totalPrice += parseFloat(cartJson[i].productAmount)*pPrice
+                                    }
+                                }
+                            }
+                        });
+                        html += '	</div>'
+                            + '	<div class="smf">'
+                            + '		共<b>'+totalNum+'</b>件商品　共计<strong>￥'+totalPrice+'</strong><br>'
+                            + '		<a href="/cloudplat/web/cart" title="去购物车结算" id="btn-payforgoods">去购物车结算</a>'
+                            + '	</div>'
+                            + '';
+                        $(".ci-count").text(totalNum);
+                        $(".cart-content").html(html);
+                        $(this).addClass("hover");
+                    }
+                },
+                function() {
+                    if('' == 2){
+                        $(this).removeClass("hover");
+                    }
+                })
+        });
+        function plSearch(){
+            if($("#pl_value").val() != ""){
+                var s = $("#pl_value").val();
+                var pattern = /[$#%?/\\;_]/g;
+                var str = "";
+                while((result = pattern.exec(s)) != null){
+                    str += result[0];
+                }
+                if(str == ""){
+                    var searchName = encodeURI($("#pl_value").val());
+                    window.location.href="/cloudplat/web/plSearch/query/7-"+searchName+"?cn=搜索";
+                }else{
+                    alert("您输入的内容中有非法字符（$ # % ? / \\ ; _），请重新输入！");
+                }
+            }
+        }
+        $(document).on("keyup","#pl_value",function(e){
+            if(e.keyCode!=37 && e.keyCode!=39) {
+                if(e.keyCode==38) {
+                    selectedObj = $(".itemed");
+                    if(!selectedObj[0]){
+                        $(".search-li:last").addClass("itemed");
+                        $("#pl_value").val($(".search-li:last").children().text());
+                    }else{
+                        if(selectedObj.attr("id")==$(".search-li:first").attr("id")){
+                            $(".search-li:last").addClass("itemed").siblings('.search-li').removeClass('itemed');
+                            $("#pl_value").val($(".search-li:last").children().text());
+                        }else{
+                            selectedObj.prev().addClass("itemed").siblings('.search-li').removeClass('itemed');
+                            $("#pl_value").val(selectedObj.prev().children().text());
+                        }
+                    }
+                } else if(e.keyCode==40) {
+                    selectedObj = $(".itemed");
+                    if(!selectedObj[0]){
+                        $(".search-li:first").addClass("itemed");
+                        $("#pl_value").val($(".search-li:first").children().text());
+                    }else{
+                        if(selectedObj.attr("id")==$(".search-li:last").attr("id")){
+                            $(".search-li:first").addClass("itemed").siblings('.search-li').removeClass('itemed');
+                            $("#pl_value").val($(".search-li:first").children().text());
+                        }else{
+                            selectedObj.next().addClass("itemed").siblings('.search-li').removeClass('itemed');
+                            $("#pl_value").val(selectedObj.next().children().text());
+                        }
+                    }
+                } else if(e.keyCode==13) {
+                    plSearch();
+                } else {
+                    var py = encodeURI($(this).val());
+                    if(py!=null && py!="") {
+                        $.ajax({
+                            url: '/cloudplat/web/pySearch/getProductName/'+py,
+                            type: 'get',
+                            dataType: 'json',
+                            async: false,
+                            success: function(data) {
+                                if(data!=null && data.length>0) {
+                                    $("#shelper").css("display","block");
+                                    $("#shelper").empty();
+                                    $(data).each(function(k,v) {
+                                        var html= '<li id="d_'+k+'" class="search-li" title="'+v.productName+'">'
+                                            + '	<div class="search-item">'+v.productName+'</div>'
+                                            + '</li>';
+                                        $("#shelper").append(html);
+                                    });
+                                    $("#shelper").append('<li class="close" onclick="hideTip()"><div>关闭</div></li>');
+                                }
+                            }
+                        });
+                    }else{
+                        $("#shelper").empty().css("display","");
+                    }
+                }
+            }
+        });
+
+
+        function goHoutai(){
+
+            var loginId = $("#loginId").val();
+
+            //获取到用户的登录id,判断该用户是不是买卖家，如果不是，不允许做后台切换。
+            $.ajax({
+                type: "post",
+                url: "/cloudplat/sys/sysUsers/isMaiMaiJia",
+                data: {'loginId':loginId},
+                success: function(e) {
+                    if(e == "success"){
+
+                        //对用户名和前后台切换标识加密
+                        var str = "qiehuanqianhoutai"; // 切换前后台
+                        var qianhoutai = encryptByDES(str);
+                        $("#qianhoutaiId").val(qianhoutai);
+                        $("#goHoutaiId").submit();
+                    }else{
+                        alert("只有买卖家才能切换到后台");
+                    }
+                }
+
+            });
+
+        }
+
+
+
+    </script>
+    <!--导航 End-->    <!-- 头部 -结束-->
+    <div class="wrap">
+        <!--轮播图-->
+        <!-- 图片展示 开始 -->
+        <div id="slider" class="swipe" style="visibility:visible;">
+            <div class="swipe-wrap" id="sylbt1">
+            </div>
+            <div style=" position:relative; top:-30px; height:0px;">
+                <ul id="position"> </ul>
+            </div>
+        </div>
+        <form method="post" id="loginForm" onsubmit="return login()" class="form-signin" autocomplete="off">
+            <div class="index-login">
+                <div class="index-regist">
+                    <div class="regist-link"><a href="/cloudplat/web/channelregist/regist">立即注册</a></div>
+                    <i></i>
+                </div>
+                <input id="frontOrBack" type="hidden"  name="frontOrBack" value="1"/>  <!-- 1=前台 0=后台 -->
+                <div class="item-fore1">
+                    <label  class="login-label name-label"></label>
+                    <input type="text" placeholder="手机号/会员名" name="j_username" id="j_username" class="itxt" value="">
+                </div>
+                <div class="item-fore1">
+                    <label class="login-label pwd-label"></label>
+                    <input type="password" placeholder="密码" name="j_password" id="j_password" class="itxt" value="">
+                </div>
+                <div class="item-fore1">
+                    <label ></label>
+                    <input type="text"   style="width:80px;height:25px;"   placeholder="验证码" name="qiantaiCode" id="qiantaiCode"  value=""  required>
+                    <img id="safecode" src="/cloudplat/web/channelregist/regist/generateCodeQianTaiLogin?t="+1481371898438 width="60" height="20" />  看不清？<a href="javascript:void(0);"  onclick="changeCode();">换一张</a>
+                    <strong id="vCodeWrong" style="display:block"></strong>
+                </div>
+                <div class="index-forget">
+                    <a href='/cloudplat/web/forgotPwd/tel'>忘记密码？</a>
+                </div>
+                <div class="index-submit">
+                    <button class="btn-sbmt" type="submit">登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</button>
+                </div>
+                <div class="index-phone">
+                    <i></i>
+                    <span id="kfdh"></span>
+                </div>
+                <div class="index-time">
+                    <p>周一至周日</p>
+                    <p>9:00-18:00</p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="rexiao">
+    <ul class="index_today" id="syggw1">
+    </ul>
+    <div class="index-news">
+        <div class="index-news-title">
+            <ul>
+                <li count="1" class="cur">热点资讯</li>
+                <li count="2" class="mid">促销资讯</li>
+                <li count="3" class="">订货会资讯</li>
+            </ul>
+        </div>
+        <div class="index-news-list show" id="count_c22450ff-c0c8-4151-8a68-e04e9a4682c7"></div>
+        <script type="text/javascript">
+            jQuery(function($) {
+                var publishOrder='100';
+                var urlreq='/cloudplat/web/index/getActivityContent';
+                var userName="anonymousUser";
+                if(publishOrder=='120'&&userName!='anonymousUser'){
+                    urlreq='/cloudplat/web/index/getActivityTradeGather'
+                }
+                $.ajax({url:urlreq,
+                    data:{columnTypeId:'c22450ff-c0c8-4151-8a68-e04e9a4682c7',acCount:'5'},
+                    dataType:"json",
+                    async:false,
+                    success:function(data){
+                        if (data != null) {
+                            var shtml = '<ul>';
+                            var len = data.length;
+                            if(len>4){
+                                len = 4;
+                            }
+                            for(var i = 0 ; i < len ; i++){
+
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<a href="/cloudplat/web/plSearch/detailTradeGather/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].activityName+'</div>'
+                                        + '</li></a>';
+                                }else{
+                                    shtml += '<a href="/cloudplat/web/content/detail/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].contentTitle+'</div>'
+                                        + '</li></a>';
+                                }
+
+                            }
+                            shtml += '</ul>'
+                            if(data.length>=4){
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<div class="more"><a href="/cloudplat/web/index/listTradeGather/100100" target="_bank">更多>></a></div>'
+
+                                }else{
+                                    shtml += '<div class="more"><a href="/cloudplat/web/content/list/100100" target="_bank">更多>></a></div>'
+
+                                }
+                            }
+                            $("#count_"+'c22450ff-c0c8-4151-8a68-e04e9a4682c7').html(shtml);
+                        }
+                    }});
+            })
+        </script>
+        <div class="index-news-list " id="count_42394078-88b1-4dcd-a34d-d26f01d64c7a"></div>
+        <script type="text/javascript">
+            jQuery(function($) {
+                var publishOrder='110';
+                var urlreq='/cloudplat/web/index/getActivityContent';
+                var userName="anonymousUser";
+                if(publishOrder=='120'&&userName!='anonymousUser'){
+                    urlreq='/cloudplat/web/index/getActivityTradeGather'
+                }
+                $.ajax({url:urlreq,
+                    data:{columnTypeId:'42394078-88b1-4dcd-a34d-d26f01d64c7a',acCount:'5'},
+                    dataType:"json",
+                    async:false,
+                    success:function(data){
+                        if (data != null) {
+                            var shtml = '<ul>';
+                            var len = data.length;
+                            if(len>4){
+                                len = 4;
+                            }
+                            for(var i = 0 ; i < len ; i++){
+
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<a href="/cloudplat/web/plSearch/detailTradeGather/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].activityName+'</div>'
+                                        + '</li></a>';
+                                }else{
+                                    shtml += '<a href="/cloudplat/web/content/detail/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].contentTitle+'</div>'
+                                        + '</li></a>';
+                                }
+
+                            }
+                            shtml += '</ul>'
+                            if(data.length>=4){
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<div class="more"><a href="/cloudplat/web/index/listTradeGather/100100" target="_bank">更多>></a></div>'
+
+                                }else{
+                                    shtml += '<div class="more"><a href="/cloudplat/web/content/list/100100" target="_bank">更多>></a></div>'
+
+                                }
+                            }
+                            $("#count_"+'42394078-88b1-4dcd-a34d-d26f01d64c7a').html(shtml);
+                        }
+                    }});
+            })
+        </script>
+        <div class="index-news-list " id="count_3a8b705c-bbc1-4fbc-a6d8-579178820c86"></div>
+        <script type="text/javascript">
+            jQuery(function($) {
+                var publishOrder='120';
+                var urlreq='/cloudplat/web/index/getActivityContent';
+                var userName="anonymousUser";
+                if(publishOrder=='120'&&userName!='anonymousUser'){
+                    urlreq='/cloudplat/web/index/getActivityTradeGather'
+                }
+                $.ajax({url:urlreq,
+                    data:{columnTypeId:'3a8b705c-bbc1-4fbc-a6d8-579178820c86',acCount:'5'},
+                    dataType:"json",
+                    async:false,
+                    success:function(data){
+                        if (data != null) {
+                            var shtml = '<ul>';
+                            var len = data.length;
+                            if(len>4){
+                                len = 4;
+                            }
+                            for(var i = 0 ; i < len ; i++){
+
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<a href="/cloudplat/web/plSearch/detailTradeGather/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].activityName+'</div>'
+                                        + '</li></a>';
+                                }else{
+                                    shtml += '<a href="/cloudplat/web/content/detail/'+data[i].id+'" target="_blank"><li>'
+                                        + '	<div class="text">'+data[i].contentTitle+'</div>'
+                                        + '</li></a>';
+                                }
+
+                            }
+                            shtml += '</ul>'
+                            if(data.length>=4){
+                                if(publishOrder=='120'&&userName!='anonymousUser'){
+                                    shtml += '<div class="more"><a href="/cloudplat/web/index/listTradeGather/100100" target="_bank">更多>></a></div>'
+
+                                }else{
+                                    shtml += '<div class="more"><a href="/cloudplat/web/content/list/100100" target="_bank">更多>></a></div>'
+
+                                }
+                            }
+                            $("#count_"+'3a8b705c-bbc1-4fbc-a6d8-579178820c86').html(shtml);
+                        }
+                    }});
+            })
+        </script>
+    </div>
+    <ul class="index_today" id="syggwRight">
+    </ul>
+</div>
+<!--1F推荐热销-->
+<div class="hot">
+    <div class="hot_top">
+        <!--标题-->
+        <div class="hot_biaoti" style="clear:both;">
+            <strong>1F</strong> <span id='floor1'></span>
+        </div>
+        <div class="more" id="more1F"></div>
+        <!--标题结束-->
+    </div>
+    <div class="hot_center">
+        <!-- sylbt4 -->
+        <div class="hot_left">
+            <div id="slider_3" class="swipe_1">
+                <div class="swipe-wrap_1" id="sylbt4"></div>
+            </div>
+            <div style=" position:relative; top:-30px; height:0px;">
+                <ul id="position_3">
+                    <!-- <li class=" "></li><li class=" "></li><li class="on_1"> -->
+                </ul>
+            </div>
+        </div>
+        <!-- sylbt4 -->
+        <!--推荐热销商品列表-->
+        <div class="hot_right_1" id="pl_f1"></div>
+    </div>
+    <!--推荐热销商品列表结束-->
+</div>
+<!--1F右侧结束-->
+<!--广告-->
+<div class="index_banner" id="syggw2"></div>
+<!--广告结束-->
+<!--2F销售排行-->
+<div class="hot">
+    <!--标题-->
+    <div class="hot_top">
+        <div class="hot_biaoti">
+            <strong style="color: #e69900;">2F</strong> <span style="color: #e69900;" id='floor2'></span>
+        </div>
+        <div class="more" id="more2F"></div>
+    </div>
+    <!--标题结束-->
+    <div class="hot_center">
+        <!-- sylbt3 -->
+        <div class=" hot_left">
+            <div id="slider_2" class="swipe_1">
+                <div class="swipe-wrap_1" id="sylbt3">
+                </div>
+            </div>
+            <div style=" position:relative; top:-30px; height:0px;">
+                <ul id="position_2">
+                </ul>
+            </div>
+        </div>
+        <!-- sylbt3 -->
+        <!--推荐热销商品列表-->
+        <div class="hot_right_1" id="pl_f2" style="border-top: 2px solid #e69900;">
+
+        </div>
+        <!--推荐热销商品列表结束-->
+    </div>
+</div>
+<!--2F-结束-->
+<!--3F-->
+<div class="hot">
+    <div class="hot_top">
+        <div class="hot_biaoti">
+            <strong style="color: #2e82ff;">3F</strong> <span style="color: #2e82ff;" id='floor3'></span>
+        </div>
+        <div class="more" id="more3F"></div>
+    </div>
+    <div class="hot_center">
+        <!-- sylbt2 -->
+        <div class=" hot_left">
+            <div id="slider_1" class="swipe_1">
+                <div class="swipe-wrap_1" id="sylbt2"></div>
+            </div>
+            <div style=" position:relative; top:-30px; height:0px;">
+                <ul id="position_1"></ul>
+            </div>
+        </div>
+        <!-- sylbt2 -->
+        <div class="hot_right_1" id="pl_f3">
+
+        </div>
+    </div>
+</div>
+<input type="hidden" id="isIndex" value="index"/>
+<script type="text/javascript">
+    $(document).ready(function(){
+        function selectFunction(wrap){
+            var oWrap=wrap;
+            var oLink=oWrap.find(".index-news-title li");
+            var oDiv=oWrap.find(".index-news-list");
+
+            oLink.click(function(){
+                var _inx=parseInt($(this).attr("count"))-1;
+                $(this).addClass("cur").siblings().removeClass("cur");
+                oDiv.removeClass("show").eq(_inx).addClass("show");
+                return false;
+            });
+        }
+
+        selectFunction($(".index-news"));  //这边是传一个容器进去
+    });
+</script>
+<!--3F结束-->
+<!--页面底部-->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" >
+<link rel="icon" href="/cloudplat/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" type="image/ico" href="/cloudplat/favicon.ico">
+<footer>
+    <div class="footer">
+        <!--新手指南-->
+        <div class="footer_new">
+            <ul>
+                <li>
+                    <h2>新手指南</h2>
+                    <ol>
+                        <a href="/cloudplat/web/help/11" target="_blank" target="_blank">  <li>注册会员</li> </a>
+                        <a href="/cloudplat/web/help/13" target="_blank">  <li>常见问题</li> </a>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+        <!--物流配送-->
+        <div class="footer_new" >
+            <ul>
+                <li>
+                    <h2>货款支付</h2>
+                    <ol>
+                        <a href="/cloudplat/web/help/21" target="_blank"> <li>线上支付</li> </a>
+                        <a href="/cloudplat/web/help/22" target="_blank">  <li>线下支付</li> </a>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+        <!--支付方式-->
+        <div class="footer_new">
+            <ul>
+                <li>
+                    <h2>联系我们</h2>
+                    <ol>
+                        <a href="/cloudplat/web/help/31" target="_blank">  <li >客户服务</li>  </a>
+                        <a href="/cloudplat/web/help/32" target="_blank">  <li >售后维修网点</li>  </a>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer_new">
+            <ul>
+                <li>
+                    <h2>服务保障</h2>
+                    <ol>
+                        <a href="/cloudplat/web/help/41" target="_blank">  <li >正品保障</li>  </a>
+                        <a href="/cloudplat/web/help/42" target="_blank">  <li >专业物流</li>  </a>
+                        <a href="/cloudplat/web/help/43" target="_blank">  <li >退换货政策</li>  </a>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+        <div class="footer_new">
+            <ul>
+                <li>
+                    <h2>关于我们</h2>
+                    <ol>
+                        <a href="/cloudplat/web/help/51" target="_blank">  <li >联系信息</li>  </a>
+                        <a href="/cloudplat/web/help/52" target="_blank">  <li >经营许可</li>  </a>
+                    </ol>
+                </li>
+            </ul>
+        </div>
+        <!--手机客户端-->
+        <!--官方微信-->
+    </div>
+    <!--版权信息-->
+    <p style="height:1px; background:#f1f1f1; width:100%; margin-bottom:20px;"></p>
+    <p style="color:#999;font-size:12px;text-align:center;clear:both;">版权所有：天翼电信终端有限公司 苏ICP备12042000号</p>
+</footer></body>
+</html>
